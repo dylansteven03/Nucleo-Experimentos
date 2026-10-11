@@ -1,0 +1,16 @@
+# IDEs (se conservan las run configurations compartidas en .run/)
+.idea/
+*.iml
+.vscode/
+
+# Build
+target/
+*.so
+*.o
+*.out
+dist/
+node_modules/
+
+# Entorno y secretos
+.env
+*.log

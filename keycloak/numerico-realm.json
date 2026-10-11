@@ -1,0 +1,5 @@
+{
+  "realm": "numerico-realm",
+  "enabled": true,
+  "_nota": "Placeholder. El realm completo (roles, cliente PKCE, usuarios) se genera en la Fase 7."
+}
