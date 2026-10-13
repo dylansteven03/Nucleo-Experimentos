@@ -25,4 +25,7 @@ int nm_newton   (const double *coef, int grado, double x0,
 int nm_secante  (const double *coef, int grado, double x0, double x1,
                  double tol, int max_iter, Iteracion *salida, int *n);
 
+/* TEMPORAL Fase 1: función de prueba para validar JNA. Se elimina en Fase 3. */
+double nm_suma(double a, double b);
+
 #endif
