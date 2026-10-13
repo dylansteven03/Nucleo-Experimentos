@@ -25,3 +25,8 @@ int nm_secante(const double *coef, int grado, double x0, double x1,
     if (n) *n = 0;
     return 4;
 }
+
+double nm_suma(double a, double b)
+{
+    return a + b;
+}
