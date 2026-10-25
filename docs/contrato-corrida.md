@@ -1,5 +1,9 @@
 # Contrato de la corrida
 
+| Fase | Responsable | Fecha de vencimiento |
+|---|---|---|
+| 2 Contrato de la corrida | Valentina | 24 oct |
+
 > **Estado: BORRADOR para revisión.** Lo revisan Valentina, Cristóbal (C) y Jonatan (Java/JNA).
 > Los puntos marcados **[DECIDIR]** están abiertos y hay que cerrarlos antes de empezar la Fase 3.
 > Cuando el contrato quede acordado, se congela: cambiarlo después requiere avisar en la bitácora.
