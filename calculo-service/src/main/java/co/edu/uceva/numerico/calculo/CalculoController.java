@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/calculo")
 public class CalculoController {
 
-    private final NativoService nativo;
+    private final CalculoSelector nativo;
 
-    public CalculoController(NativoService nativo) {
+    public CalculoController(CalculoSelector nativo) {
         this.nativo = nativo;
     }
 

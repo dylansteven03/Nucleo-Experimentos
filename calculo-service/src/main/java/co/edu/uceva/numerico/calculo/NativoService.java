@@ -85,7 +85,7 @@ public class NativoService {
     }
 
     /** Traduce los códigos de C a la causa de la API (sección 5 del contrato). */
-    private static String causa(int codigo, String metodo) {
+    static String causa(int codigo, String metodo) {
         return switch (codigo) {
             case 1 -> "MAX_ITERATIONS_REACHED";
             case 2 -> "ZERO_DERIVATIVE";
