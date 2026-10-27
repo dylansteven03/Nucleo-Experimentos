@@ -1,7 +1,7 @@
 # Bitácora de decisiones de arquitectura — Núcleo
 
 | Fecha | Decisión | Alternativas descartadas | Justificada contra | Quién |
-
+|---|---|---|---|---|
 | 2026-10-10 | Reparto modular: 4 microservicios Spring Boot, módulo nativo en C, frontend Angular | Monolito; microservicios compartiendo una sola base de datos | RQ-02 Modificabilidad: agregar un método debe ser una operación local | Dylan Steven Bedón Ramírez (propuso y subió); apoyo: equipo de Programacion en Ambiente Web 2 |
 | 2026-10-10 | API Gateway reactivo (Spring Cloud Gateway + WebClient) | Servicio Spring MVC con RestClient. Descartado por hipótesis: la orquestación bloqueante podría agotar el pool de hilos bajo ráfagas concurrentes (por validar con medición) | Desempeño (escenario adicional de carga concurrente por redactar). Se asume el costo de un convertidor JWT reactivo propio en el gateway | Dylan Steven Bedón Ramírez (propuso y subió); apoyo: equipo de Programacion en Ambiente Web 2 |
 | 2026-10-26 | Dockerfile multietapa (gcc → Maven/JDK → JRE): la imagen final solo lleva libnumerico.so y el JAR | Compilar el C dentro de la imagen final (descartada: arrastraría el compilador; la etapa gcc:13 pesa 1.97 GB); compilar el .so en Windows y copiarlo (descartada: la biblioteca es solo de Linux y no carga en otro sistema) | RQ-03 Facilidad de despliegue | Dylan Steven Bedón Ramírez (implementó y subió); apoyo: Valentina Rosero Ocoro |
