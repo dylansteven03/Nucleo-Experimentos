@@ -24,7 +24,7 @@ Medido el 2026-10-26 en el portátil de desarrollo, no en una máquina limpia.
 | Tamaño en disco (disk usage, docker images) | 511 MB | menos de 250 MB: no cumple |
 | Capas de la base (Ubuntu 117 MB + paquetes 58 MB + JRE 166 MB) | unos 341 MB | |
 | app.jar | 29 MB | |
-| libnumerico.so | 28.7 kB | |
+| libnumerico.so | 15,3 kB (corregido en la segunda medición) | |
 | Etapa de compilación descartada (gcc:13) | 1.97 GB | |
 | Arranque hasta la primera respuesta correcta (3 corridas) | 4,27 s, 4,13 s, 4,14 s | |
 | Mediana del arranque | 4,14 s | menos de 90 s: cumple |
@@ -61,3 +61,24 @@ Medido el 2026-10-27 en el portátil de desarrollo (Docker Desktop). Suite: 43 c
 Análisis: la suite cumple con holgura; el tiempo lo domina el arranque de Maven y de Docker, no las pruebas. La primera ejecución en una máquina sin dependencias descargadas supera los 30 s por la descarga de librerías; en el Dockerfile y en un pipeline conviene usar un caché de dependencias.
 
 Pendiente: repetir en una máquina limpia.
+
+## Mediciones RQ-03 (segunda medición: --no-cache, imagen nucleo-calculo:fase4c)
+
+Medido el 2026-10-27 en el portátil de desarrollo, no en una máquina limpia. La imagen se construyó con docker build --no-cache.
+
+| Dato | Valor | Meta |
+|---|---|---|
+| Compilador (gcc) en la imagen final | no existe | no debe haber: cumple |
+| Archivos .c o .java en la imagen | ninguno | no debe haber fuentes: cumple |
+| Contenido de /app | app.jar 28,9 MB (28 955 473 bytes) y lib/libnumerico.so 15 336 bytes | solo lo necesario: cumple |
+| Tamaño comprimido (content size) | 141 MB | menos de 250 MB: cumple |
+| Tamaño en disco (disk usage) | 511 MB | menos de 250 MB: no cumple |
+| Arranque hasta la primera respuesta (3 corridas) | 3,21 s, 3,13 s, 3,09 s | |
+| Mediana del arranque | 3,13 s | menos de 90 s: cumple |
+| Construcción de la imagen con --no-cache | 99,8 s (Maven 95,6 s, gcc 0,3 s) | informativo |
+
+Corrección: en la primera medición se anotó libnumerico.so en 28,7 kB; el archivo de esta imagen pesa 15 336 bytes (15,3 kB).
+
+Análisis: la imagen cumple lo que se puede verificar sin discusión (sin compilador ni fuentes, contenido mínimo, arranque muy por debajo de 90 s). El tamaño depende de la columna que se tome: comprimido cumple y en disco no cumple, y se consulta con el profesor. Se aclara también si los 90 s se cuentan desde el arranque del contenedor (3,13 s) o incluyen la construcción sin caché (unos 103 s).
+
+Pendiente: medición «antes» (imagen sin la biblioteca) y repetir en una máquina limpia.
