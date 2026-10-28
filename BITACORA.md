@@ -45,3 +45,19 @@ Medido el 2026-10-27 en el portátil de desarrollo (Docker Desktop), con la imag
 Análisis: ambos motores cumplen con holgura. Con este caso pequeño Java es más rápido por dentro porque cada llamada a C paga el cruce JNA (reserva y copia de un arreglo de 100 estructuras); el costo total lo domina HTTP y Spring. La primera corrida es más lenta en ambos (carga de la biblioteca en C, calentamiento de la JVM en Java).
 
 Pendiente: repetir con carga mayor (polinomio de grado 10, muchas iteraciones, tol más estricta) para ver si la ventaja de C aparece, y medir en una máquina limpia.
+
+## Mediciones RQ-02 (primera medición: suite de pruebas)
+
+Medido el 2026-10-27 en el portátil de desarrollo (Docker Desktop). Suite: 43 comprobaciones en C (casos 1 a 11 del contrato, parámetros inválidos y RN-02) y 29 pruebas en Java (línea base, selector de motor y comparación C contra Java en los 11 casos).
+
+| Medición | Resultado | Meta |
+|---|---|---|
+| Maven con caché caliente, 3 corridas | 4,7 s / 4,8 s / 5,0 s (mediana 4,8 s) | menos de 30 s: cumple |
+| Pruebas en C (compilar y ejecutar) | 0,72 s | |
+| Suite completa (Maven + C) | unos 5,5 s | menos de 30 s: cumple |
+| Solo las pruebas de Java (tiempos por clase) | unos 0,5 s | |
+| Primera corrida con el caché de Maven vacío | 53,6 s | solo descarga de dependencias |
+
+Análisis: la suite cumple con holgura; el tiempo lo domina el arranque de Maven y de Docker, no las pruebas. La primera ejecución en una máquina sin dependencias descargadas supera los 30 s por la descarga de librerías; en el Dockerfile y en un pipeline conviene usar un caché de dependencias.
+
+Pendiente: repetir en una máquina limpia.
