@@ -1,5 +1,76 @@
 {
   "realm": "numerico-realm",
   "enabled": true,
-  "_nota": "Placeholder. El realm completo (roles, cliente PKCE, usuarios) se genera en la Fase 7."
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "accessTokenLifespan": 300,
+  "roles": {
+    "realm": [
+      { "name": "docente", "description": "Administra el catálogo de funciones y consulta el historial completo" },
+      { "name": "estudiante", "description": "Ejecuta métodos y consulta únicamente su propio historial" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "numerico-web",
+      "name": "Núcleo (frontend Angular)",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": ["http://localhost:4200/*"],
+      "webOrigins": ["http://localhost:4200"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:4200/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "audience-numerico-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "numerico-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "docente1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Docente",
+      "lastName": "Prueba",
+      "email": "docente1@numerico.test",
+      "credentials": [{ "type": "password", "value": "docente123", "temporary": false }],
+      "realmRoles": ["docente"]
+    },
+    {
+      "username": "estudiante1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Estudiante",
+      "lastName": "Uno",
+      "email": "estudiante1@numerico.test",
+      "credentials": [{ "type": "password", "value": "estudiante123", "temporary": false }],
+      "realmRoles": ["estudiante"]
+    },
+    {
+      "username": "estudiante2",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Estudiante",
+      "lastName": "Dos",
+      "email": "estudiante2@numerico.test",
+      "credentials": [{ "type": "password", "value": "estudiante123", "temporary": false }],
+      "realmRoles": ["estudiante"]
+    }
+  ]
 }

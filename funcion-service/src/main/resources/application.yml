@@ -1,0 +1,27 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: funcion-service
+  datasource:
+    url: jdbc:postgresql://${FUNCION_DB_HOST:localhost}:${FUNCION_DB_PORT:5433}/${POSTGRES_FUNCION_DB:funciones}
+    username: ${POSTGRES_FUNCION_USER:funcion}
+    password: ${POSTGRES_FUNCION_PASSWORD:cambiar}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update   # solo desarrollo; en producción se cambia por migraciones
+
+nucleo:
+  security:
+    # Debe coincidir exactamente con el claim "iss" del token que emite Keycloak.
+    issuer: ${KEYCLOAK_ISSUER:http://localhost:8180/realms/numerico-realm}
+    jwk-set-uri: ${KEYCLOAK_JWKS:http://localhost:8180/realms/numerico-realm/protocol/openid-connect/certs}
+    audience: numerico-api
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
