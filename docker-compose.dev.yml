@@ -1,0 +1,53 @@
+# Infraestructura de DESARROLLO: Keycloak + las dos bases de datos.
+# Los microservicios se corren desde IntelliJ. El compose completo (todo el sistema)
+# llega en la Fase 9 como docker-compose.yml.
+#
+# Uso:   docker compose -f docker-compose.dev.yml up -d
+# Parar: docker compose -f docker-compose.dev.yml down        (agregar -v borra los datos)
+services:
+  postgres-funcion:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_FUNCION_DB:-funciones}
+      POSTGRES_USER: ${POSTGRES_FUNCION_USER:-funcion}
+      POSTGRES_PASSWORD: ${POSTGRES_FUNCION_PASSWORD:-cambiar}
+    ports:
+      - "5433:5432"
+    volumes:
+      - funcion-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  postgres-historial:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_HISTORIAL_DB:-historial}
+      POSTGRES_USER: ${POSTGRES_HISTORIAL_USER:-historial}
+      POSTGRES_PASSWORD: ${POSTGRES_HISTORIAL_PASSWORD:-cambiar}
+    ports:
+      - "5434:5432"
+    volumes:
+      - historial-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.6
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-cambiar}
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./keycloak/numerico-realm.json:/opt/keycloak/data/import/numerico-realm.json:ro
+
+volumes:
+  funcion-data:
+  historial-data:
