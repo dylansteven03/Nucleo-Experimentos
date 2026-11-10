@@ -13,11 +13,20 @@ function Obtener-Token($usuario, $clave) {
     return ($json | ConvertFrom-Json).access_token
 }
 
+# El cuerpo JSON se manda desde un archivo temporal: PowerShell 5.1 pierde las comillas
+# si se pasa el JSON directo como argumento a curl.exe.
 function Codigo($metodo, $token, $cuerpo) {
     $parametros = @("-s", "-o", "NUL", "-w", "%{http_code}", "-X", $metodo, $api)
-    if ($token)  { $parametros += @("-H", "Authorization: Bearer $token") }
-    if ($cuerpo) { $parametros += @("-H", "Content-Type: application/json", "-d", $cuerpo) }
-    return (& curl.exe @args)
+    if ($token) { $parametros += @("-H", "Authorization: Bearer $token") }
+    $archivo = $null
+    if ($cuerpo) {
+        $archivo = [System.IO.Path]::GetTempFileName()
+        [System.IO.File]::WriteAllText($archivo, $cuerpo)
+        $parametros += @("-H", "Content-Type: application/json", "--data-binary", "@$archivo")
+    }
+    $salida = & curl.exe @parametros
+    if ($archivo) { Remove-Item $archivo -ErrorAction SilentlyContinue }
+    return $salida
 }
 
 $docente    = Obtener-Token "docente1" "docente123"
