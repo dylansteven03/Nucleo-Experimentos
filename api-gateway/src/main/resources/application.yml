@@ -1,0 +1,26 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+nucleo:
+  # A dónde enruta el gateway. En Docker Compose se sobrescriben con el nombre de cada servicio.
+  rutas:
+    funcion: ${FUNCION_URL:http://localhost:8081}
+    calculo: ${CALCULO_URL:http://localhost:8082}
+    historial: ${HISTORIAL_URL:http://localhost:8083}
+  cors:
+    origenes: ${CORS_ORIGENES:http://localhost:4200}
+  security:
+    # Debe coincidir exactamente con el claim "iss" del token que emite Keycloak.
+    issuer: ${KEYCLOAK_ISSUER:http://localhost:8180/realms/numerico-realm}
+    jwk-set-uri: ${KEYCLOAK_JWKS:http://localhost:8180/realms/numerico-realm/protocol/openid-connect/certs}
+    audience: numerico-api
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
