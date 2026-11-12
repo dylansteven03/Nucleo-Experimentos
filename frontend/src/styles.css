@@ -1,0 +1,81 @@
+:root {
+  --fondo: #f4f6f8;
+  --tarjeta: #ffffff;
+  --texto: #1f2933;
+  --suave: #6b7785;
+  --linea: #d9dee4;
+  --primario: #1b5e8c;
+  --primario-oscuro: #134566;
+  --ok-fondo: #e3f4e8;
+  --ok-texto: #1d6b34;
+  --error-fondo: #fbe6e6;
+  --error-texto: #9a2020;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  line-height: 1.45;
+}
+
+h1 { font-size: 1.5rem; margin: 0 0 1rem; }
+h2 { font-size: 1.1rem; margin: 0 0 .75rem; }
+
+.barra {
+  display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+  padding: .75rem 1.5rem; background: var(--primario); color: #fff;
+}
+.barra .marca { font-weight: 700; font-size: 1.1rem; }
+.barra .marca small { font-weight: 400; opacity: .8; margin-left: .5rem; }
+.barra nav { display: flex; gap: 1rem; flex: 1; }
+.barra nav a { color: #fff; text-decoration: none; padding: .25rem .5rem; border-radius: 4px; opacity: .85; }
+.barra nav a:hover { opacity: 1; }
+.barra nav a.activo { background: var(--primario-oscuro); opacity: 1; }
+.barra .sesion { display: flex; align-items: center; gap: .5rem; }
+.barra .rol { background: rgba(255, 255, 255, .2); border-radius: 999px; padding: 0 .6rem; font-size: .85rem; }
+.barra button { background: transparent; border: 1px solid rgba(255, 255, 255, .6); color: #fff; }
+
+.contenido { max-width: 1000px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+.tarjeta {
+  background: var(--tarjeta); border: 1px solid var(--linea); border-radius: 8px;
+  padding: 1rem 1.25rem; margin-bottom: 1.25rem; overflow-x: auto;
+}
+
+form label { display: block; margin-bottom: .75rem; font-size: .9rem; font-weight: 600; }
+form label input, form label select { display: block; width: 100%; margin-top: .25rem; font-weight: 400; }
+form small, .nota { color: var(--suave); font-weight: 400; }
+.fila { display: flex; gap: 1rem; flex-wrap: wrap; }
+.fila > label { flex: 1 1 150px; }
+
+input, select {
+  padding: .45rem .6rem; border: 1px solid var(--linea); border-radius: 6px;
+  font: inherit; background: #fff; color: inherit;
+}
+input:focus, select:focus { outline: 2px solid var(--primario); outline-offset: 0; }
+
+button {
+  font: inherit; padding: .45rem .9rem; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--primario); background: var(--primario); color: #fff;
+}
+button:hover:not(:disabled) { background: var(--primario-oscuro); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button.peligro { background: #fff; color: var(--error-texto); border-color: var(--error-texto); }
+
+table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+th, td { padding: .4rem .6rem; border-bottom: 1px solid var(--linea); text-align: left; white-space: nowrap; }
+th { color: var(--suave); font-weight: 600; }
+code { background: var(--fondo); padding: 0 .3rem; border-radius: 4px; }
+
+.aviso { margin-top: .75rem; padding: .6rem .8rem; border-radius: 6px; }
+.aviso.ok { background: var(--ok-fondo); color: var(--ok-texto); }
+.aviso.error { background: var(--error-fondo); color: var(--error-texto); }
+.aviso ul { margin: .4rem 0 0; padding-left: 1.2rem; }
+
+.pestanas { display: flex; gap: .5rem; margin-bottom: 1rem; }
+.pestanas button { background: #fff; color: var(--primario); }
+.pestanas button.activa { background: var(--primario); color: #fff; }
