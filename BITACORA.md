@@ -108,3 +108,20 @@ Evidencia generada con los scripts de `scripts/` y guardada en `docs/`. Todos lo
 | `evidencia-stack-docker.txt` (sistema completo) | Los nueve casos por el puerto 8080, incluida la llamada al cálculo en C que desde IntelliJ en Windows no carga |
 
 Pendiente: confirmar con el profesor el orden de los coeficientes (menor a mayor, como el contrato, o mayor a menor, como el documento).
+
+## Mediciones RQ-01 (segunda medición: por el gateway, 30 corridas)
+
+Medido el 2026-11-11 en el portátil de desarrollo (Docker Desktop), no en una máquina limpia. Sistema completo con docker compose, todas las llamadas por el api-gateway (puerto 8080) con token de docente. Por caso: 40 corridas, se descartan las 10 primeras y la estadística usa las 30 restantes. Script: scripts/medicion-rq01.ps1; salida completa en docs/medicion-rq01.txt. Todos los casos terminaron en CONVERGIO.
+
+| Caso | Mediana total | p95 total | Mediana nativo | p95 nativo | Meta |
+|---|---|---|---|---|---|
+| Bisección x²-4 en [0,5], tol 1e-10 | 18,25 ms | 35,47 ms | 0,18 ms | 0,32 ms | total < 500 ms y nativo < 50 ms: cumple |
+| Newton x²-4, x0=3, tol 1e-10 | 13,53 ms | 21,22 ms | 0,08 ms | 0,24 ms | cumple |
+| Secante x²-4, x0=1, x1=3, tol 1e-10 | 12,30 ms | 35,02 ms | 0,08 ms | 0,10 ms | cumple |
+| Bisección x^10-2 en [0,2], tol 1e-12 | 11,55 ms | 32,87 ms | 0,07 ms | 0,12 ms | cumple |
+
+Análisis: el peor p95 total (35,47 ms) es unas 14 veces menor que la meta de 500 ms, y el peor p95 nativo (0,32 ms) es unas 150 veces menor que la de 50 ms. El tiempo total lo dominan el recorrido HTTP, la validación del token (en el gateway y otra vez en el servicio) y Spring; el cálculo en C pesa menos de 1 ms. El polinomio de grado 10 con tolerancia 1e-12 no es más lento que los casos pequeños, así que con estos tamaños la carga numérica no pesa; la medición con carga mayor que estaba pendiente no muestra diferencia. Respecto a la primera medición (directa al servicio, 27 ms de mediana total), la mediana aquí es menor porque ya se descartó el calentamiento, aunque el recorrido incluye una parada más (el gateway).
+
+Límites: la primera corrida de cada caso (carga de la biblioteca en C, calentamiento de la JVM) se descartó por diseño, así que el arranque en frío no está cubierto por esta tabla. Con 30 muestras, el p95 es el valor número 29, es decir casi el máximo, por lo que es sensible a un pico aislado. El tiempo total incluye el proceso curl.
+
+Pendiente: repetir con NUCLEO_MOTOR=java en las mismas condiciones para comparar los dos motores; repetir el script tres veces y reportar la variación; medir en una máquina limpia.
