@@ -11,6 +11,7 @@ import { AuthService } from './core/auth.service';
       <nav>
         <a routerLink="/funciones" routerLinkActive="activo">Funciones</a>
         <a routerLink="/ejecutar" routerLinkActive="activo">Ejecutar</a>
+        <a routerLink="/comparar" routerLinkActive="activo">Comparar</a>
         <a routerLink="/historial" routerLinkActive="activo">Historial</a>
       </nav>
       <span class="sesion">

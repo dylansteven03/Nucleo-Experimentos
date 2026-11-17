@@ -1,11 +1,11 @@
-# Sistema COMPLETO en Docker: Keycloak, dos bases de datos, tres servicios Java, calculo-service (C por JNA)
-# y el api-gateway como puerta única.
+# Sistema COMPLETO en Docker: Keycloak, dos bases de datos, tres servicios Java, calculo-service (C por JNA),
+# el api-gateway como puerta única y el frontend Angular (nginx) en http://localhost:4200.
 #
 # Uso:   docker compose up -d --build
 # Parar: docker compose down          (agregar -v borra los datos)
 #
-# Antes de usarlo, apague docker-compose.dev.yml y cierre los servicios que tenga corriendo en IntelliJ:
-# usan los mismos puertos (8080 a 8083, 8180).
+# Antes de usarlo, apague docker-compose.dev.yml y cierre los servicios que tenga corriendo en IntelliJ y el
+# "npm start" del frontend: usan los mismos puertos (4200, 8080 a 8083, 8180).
 #
 # Detalle de Keycloak: el token lo pide el usuario por http://localhost:8180, así que su emisor ("iss") es
 # http://localhost:8180/realms/numerico-realm. Pero DENTRO de Docker, localhost no es Keycloak: cada servicio
@@ -113,6 +113,14 @@ services:
       - historial-service
     ports:
       - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - api-gateway
+    ports:
+      - "4200:80"
 
 volumes:
   funcion-data:
