@@ -1,7 +1,8 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CalculoApi, FuncionesApi, HistorialApi } from '../core/api.service';
-import { Funcion, Metodo, ResultadoCalculo } from '../models';
+import { GraficaError } from '../componentes/grafica-error';
+import { Funcion, Metodo, NOMBRE_METODO, ResultadoCalculo, SerieError } from '../models';
 import { formatoNumero, formatoPolinomio, leerError } from '../util';
 
 /**
@@ -11,7 +12,7 @@ import { formatoNumero, formatoPolinomio, leerError } from '../util';
  */
 @Component({
   selector: 'app-ejecutar',
-  imports: [FormsModule],
+  imports: [FormsModule, GraficaError],
   template: `
     <h1>Ejecutar un método</h1>
 
@@ -82,7 +83,11 @@ import { formatoNumero, formatoPolinomio, leerError } from '../util';
           <p class="nota">{{ guardado() }}</p>
         }
 
+        <h2>Caída del error</h2>
+        <app-grafica-error [series]="serie()" [tolerancia]="tolUsada()" />
+
         @if (columnas().length > 0) {
+          <h2>Iteraciones</h2>
           <table>
             <thead>
               <tr>@for (c of columnas(); track c) { <th>{{ c }}</th> }</tr>
@@ -116,10 +121,18 @@ export class EjecutarPagina implements OnInit {
   protected readonly resultado = signal<ResultadoCalculo | null>(null);
   protected readonly tiempoTotalMs = signal(0);
   protected readonly guardado = signal('');
+  protected readonly tolUsada = signal<number | null>(null);
+  private readonly metodoEjecutado = signal<Metodo>('biseccion');
 
   protected readonly seleccionada = computed(
     () => this.funciones().find((f) => f.id === this.funcionId()) ?? null,
   );
+
+  /** La curva de la gráfica (HU-05): las iteraciones de la última corrida, con el nombre de su método. */
+  protected readonly serie = computed<SerieError[]>(() => {
+    const r = this.resultado();
+    return r ? [{ nombre: NOMBRE_METODO[this.metodoEjecutado()], filas: r.iteraciones }] : [];
+  });
 
   /** Las columnas salen de la primera fila: así la pantalla sigue las que defina el backend. */
   protected readonly columnas = computed(() => {
@@ -196,6 +209,8 @@ export class EjecutarPagina implements OnInit {
         const total = performance.now() - inicio;
         this.ejecutando.set(false);
         this.tiempoTotalMs.set(total);
+        this.tolUsada.set(tol);
+        this.metodoEjecutado.set(metodo);
         this.resultado.set(r);
         this.registrarEnHistorial(f.id, metodo, r, total);
       },

@@ -63,3 +63,15 @@ export interface ErrorApi {
   mensaje: string;
   detalles: ErrorCampo[];
 }
+
+export const NOMBRE_METODO: Record<Metodo, string> = {
+  biseccion: 'Bisección',
+  newton: 'Newton',
+  secante: 'Secante',
+};
+
+/** Una curva de la gráfica: las iteraciones de una corrida con el nombre con que se rotula. */
+export interface SerieError {
+  nombre: string;
+  filas: FilaIteracion[];
+}
