@@ -95,6 +95,7 @@ services:
     environment:
       NUCLEO_SECURITY_ISSUER: http://localhost:8180/realms/numerico-realm
       NUCLEO_SECURITY_JWK_SET_URI: http://keycloak:8080/realms/numerico-realm/protocol/openid-connect/certs
+      NUCLEO_MOTOR: ${NUCLEO_MOTOR:-nativo}
     ports:
       - "8082:8082"
 
