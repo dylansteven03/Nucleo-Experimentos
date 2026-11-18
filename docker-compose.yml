@@ -1,15 +1,19 @@
-# Sistema COMPLETO en Docker: Keycloak, dos bases de datos, tres servicios Java, calculo-service (C por JNA)
-# y el api-gateway como puerta única.
+# MANIFIESTO DE DESPLIEGUE de todo el sistema (RQ-03): Keycloak, dos bases de datos, tres servicios Java,
+# calculo-service (C por JNA), el api-gateway como puerta única y el frontend Angular (nginx, puerto 4200).
+# Declara los límites de CPU y memoria de CADA servicio (sección deploy.resources.limits): son el entorno
+# con el que se miden RQ-01 y RQ-03. Docker Compose v2 los aplica al levantar.
 #
-# Uso:   docker compose up -d --build
-# Parar: docker compose down          (agregar -v borra los datos)
+# Un solo comando, sin pasos manuales:   docker compose up -d --build
+# Parar:                                 docker compose down          (agregar -v borra los datos)
+# La versión para Docker Swarm es docker-stack.yml (ver docs/despliegue.md).
 #
-# Antes de usarlo, apague docker-compose.dev.yml y cierre los servicios que tenga corriendo en IntelliJ:
-# usan los mismos puertos (8080 a 8083, 8180).
+# Antes de usarlo, apague docker-compose.dev.yml y cierre los servicios que tenga corriendo en IntelliJ y el
+# "npm start" del frontend: usan los mismos puertos (4200, 8080 a 8083, 8180).
 #
 # Detalle de Keycloak: el token lo pide el usuario por http://localhost:8180, así que su emisor ("iss") es
 # http://localhost:8180/realms/numerico-realm. Pero DENTRO de Docker, localhost no es Keycloak: cada servicio
 # descarga las claves públicas desde http://keycloak:8080. Por eso emisor y JWKS son dos valores distintos.
+
 x-keycloak: &keycloak
   KEYCLOAK_ISSUER: http://localhost:8180/realms/numerico-realm
   KEYCLOAK_JWKS: http://keycloak:8080/realms/numerico-realm/protocol/openid-connect/certs
@@ -28,6 +32,11 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
 
   postgres-historial:
     image: postgres:16
@@ -42,6 +51,11 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
 
   keycloak:
     image: quay.io/keycloak/keycloak:25.0.6
@@ -53,8 +67,14 @@ services:
       - "8180:8080"
     volumes:
       - ./keycloak/numerico-realm.json:/opt/keycloak/data/import/numerico-realm.json:ro
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1536M
 
   funcion-service:
+    image: nucleo-funcion-service:latest
     build:
       context: .
       dockerfile: funcion-service/Dockerfile
@@ -70,8 +90,14 @@ services:
         condition: service_healthy
     ports:
       - "8081:8081"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
 
   historial-service:
+    image: nucleo-historial-service:latest
     build:
       context: .
       dockerfile: historial-service/Dockerfile
@@ -87,18 +113,31 @@ services:
         condition: service_healthy
     ports:
       - "8083:8083"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
 
   calculo-service:
+    image: nucleo-calculo-service:latest
     build:
       context: .
       dockerfile: calculo-service/Dockerfile
     environment:
       NUCLEO_SECURITY_ISSUER: http://localhost:8180/realms/numerico-realm
       NUCLEO_SECURITY_JWK_SET_URI: http://keycloak:8080/realms/numerico-realm/protocol/openid-connect/certs
+      NUCLEO_MOTOR: ${NUCLEO_MOTOR:-nativo}
     ports:
       - "8082:8082"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
 
   api-gateway:
+    image: nucleo-api-gateway:latest
     build:
       context: .
       dockerfile: api-gateway/Dockerfile
@@ -113,6 +152,25 @@ services:
       - historial-service
     ports:
       - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+
+  frontend:
+    image: nucleo-frontend:latest
+    build:
+      context: ./frontend
+    depends_on:
+      - api-gateway
+    ports:
+      - "4200:80"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 64M
 
 volumes:
   funcion-data:
