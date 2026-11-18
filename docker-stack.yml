@@ -1,0 +1,181 @@
+# MANIFIESTO DE DESPLIEGUE para Docker Swarm (stack) de todo el sistema (RQ-03).
+# Mismos servicios, puertos y límites de CPU y memoria que docker-compose.yml, pero con lo que Swarm exige:
+#  - Swarm no construye imágenes: usa las que construye "docker compose build" (nucleo-*:latest).
+#  - Swarm ignora depends_on: si una base de datos aún no está lista, el servicio falla al arrancar y
+#    restart_policy lo reintenta hasta que conecta. Por eso cada servicio lleva restart_policy.
+#  - Los límites están en deploy.resources.limits (más una reserva mínima en reservations).
+#
+# Despliegue (PowerShell, desde la raíz del repo):   .\scripts\desplegar-swarm.ps1
+# Quitar:                                            docker stack rm nucleo
+# Antes: docker compose down (usan los mismos puertos). Ver docs/despliegue.md.
+x-keycloak: &keycloak
+  KEYCLOAK_ISSUER: http://localhost:8180/realms/numerico-realm
+  KEYCLOAK_JWKS: http://keycloak:8080/realms/numerico-realm/protocol/openid-connect/certs
+
+x-reinicio: &reinicio
+  condition: on-failure
+  delay: 5s
+
+services:
+  postgres-funcion:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_FUNCION_DB:-funciones}
+      POSTGRES_USER: ${POSTGRES_FUNCION_USER:-funcion}
+      POSTGRES_PASSWORD: ${POSTGRES_FUNCION_PASSWORD:-cambiar}
+    volumes:
+      - funcion-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    deploy:
+      replicas: 1
+      restart_policy: *reinicio
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          memory: 64M
+
+  postgres-historial:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_HISTORIAL_DB:-historial}
+      POSTGRES_USER: ${POSTGRES_HISTORIAL_USER:-historial}
+      POSTGRES_PASSWORD: ${POSTGRES_HISTORIAL_PASSWORD:-cambiar}
+    volumes:
+      - historial-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    deploy:
+      replicas: 1
+      restart_policy: *reinicio
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          memory: 64M
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.6
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-cambiar}
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./keycloak/numerico-realm.json:/opt/keycloak/data/import/numerico-realm.json:ro
+    deploy:
+      replicas: 1
+      restart_policy: *reinicio
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1536M
+        reservations:
+          memory: 512M
+
+  funcion-service:
+    image: nucleo-funcion-service:latest
+    environment:
+      <<: *keycloak
+      FUNCION_DB_HOST: postgres-funcion
+      FUNCION_DB_PORT: 5432
+      POSTGRES_FUNCION_DB: ${POSTGRES_FUNCION_DB:-funciones}
+      POSTGRES_FUNCION_USER: ${POSTGRES_FUNCION_USER:-funcion}
+      POSTGRES_FUNCION_PASSWORD: ${POSTGRES_FUNCION_PASSWORD:-cambiar}
+    ports:
+      - "8081:8081"
+    deploy:
+      replicas: 1
+      restart_policy: *reinicio
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  historial-service:
+    image: nucleo-historial-service:latest
+    environment:
+      <<: *keycloak
+      HISTORIAL_DB_HOST: postgres-historial
+      HISTORIAL_DB_PORT: 5432
+      POSTGRES_HISTORIAL_DB: ${POSTGRES_HISTORIAL_DB:-historial}
+      POSTGRES_HISTORIAL_USER: ${POSTGRES_HISTORIAL_USER:-historial}
+      POSTGRES_HISTORIAL_PASSWORD: ${POSTGRES_HISTORIAL_PASSWORD:-cambiar}
+    ports:
+      - "8083:8083"
+    deploy:
+      replicas: 1
+      restart_policy: *reinicio
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  calculo-service:
+    image: nucleo-calculo-service:latest
+    environment:
+      NUCLEO_SECURITY_ISSUER: http://localhost:8180/realms/numerico-realm
+      NUCLEO_SECURITY_JWK_SET_URI: http://keycloak:8080/realms/numerico-realm/protocol/openid-connect/certs
+      NUCLEO_MOTOR: ${NUCLEO_MOTOR:-nativo}
+    ports:
+      - "8082:8082"
+    deploy:
+      replicas: 1
+      restart_policy: *reinicio
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  api-gateway:
+    image: nucleo-api-gateway:latest
+    environment:
+      <<: *keycloak
+      FUNCION_URL: http://funcion-service:8081
+      CALCULO_URL: http://calculo-service:8082
+      HISTORIAL_URL: http://historial-service:8083
+    ports:
+      - "8080:8080"
+    deploy:
+      replicas: 1
+      restart_policy: *reinicio
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  frontend:
+    image: nucleo-frontend:latest
+    ports:
+      - "4200:80"
+    deploy:
+      replicas: 1
+      restart_policy: *reinicio
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 64M
+        reservations:
+          memory: 16M
+
+volumes:
+  funcion-data:
+  historial-data:
