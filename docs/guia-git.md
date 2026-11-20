@@ -1,6 +1,6 @@
 # Guía básica de Git para el equipo
 
-Esta guía es de resumen  para aportar cambios al proyecto 
+Esta guía es de resumen para aportar cambios al proyecto.
 
 ## Flujo de trabajo
 
@@ -25,3 +25,19 @@ Esta guía es de resumen  para aportar cambios al proyecto
 - No trabajar directamente en `develop`.
 - Hacer `git pull` antes de empezar a trabajar.
 - Hacer commits pequeños y con mensajes claros.
+
+## Después de fusionar el Pull Request
+
+Una vez que el Pull Request haya sido revisado y fusionado:
+
+1. Cambiarse a la rama develop: `git checkout develop`
+2. Actualizar los cambios del repositorio: `git pull origin develop`
+3. Eliminar la rama local que ya fue fusionada: `git branch -d feature/nombre-cambio`
+4. Comprobar que el repositorio esté actualizado: `git status`
+
+## Buenas prácticas adicionales
+
+- Crear una rama diferente para cada aporte.
+- Revisar los cambios antes de realizar un commit.
+- Solicitar la revisión de otro integrante antes de fusionar un Pull Request.
+- No eliminar ramas que todavía tengan cambios pendientes de integrar.
