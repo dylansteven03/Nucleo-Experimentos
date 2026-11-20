@@ -20,6 +20,9 @@ export function parsearCoeficientes(texto: string): CoeficientesLeidos {
     }
     valores.push(numero);
   }
+    if (valores.every((v) => v === 0)) {
+    return { valores: [], error: 'Los coeficientes no pueden ser todos cero' };
+  }
   return { valores, error: null };
 }
 
