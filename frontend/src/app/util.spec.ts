@@ -23,6 +23,13 @@ describe('parsearCoeficientes', () => {
     expect(r.valores).toEqual([]);
     expect(r.error).toContain('dos');
   });
+
+  // NUEVA PRUEBA
+  it('rechaza coeficientes que son todos cero', () => {
+    const r = parsearCoeficientes('0, 0, 0');
+    expect(r.valores).toEqual([]);
+    expect(r.error).toBe('Los coeficientes no pueden ser todos cero');
+  });
 });
 
 describe('formatoPolinomio', () => {
